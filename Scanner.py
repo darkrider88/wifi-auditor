@@ -5,6 +5,7 @@ import signal
 import time
 import colors
 from banner import banner
+from attack import Attack
 from scapy.all import *
 
 class Scanner(object):
@@ -82,8 +83,9 @@ class Scanner(object):
 
 		print("")
 		print(colors.R+"[!]" + colors.W +" Aborting scan")
-		input(colors.O + "[?]" +colors.W + " Select target to attack (MAC Address): ")
-		self.ENGINE.exit()
+		target = input(colors.O + "[?]" +colors.W + " Select target to attack (MAC Address): ")
+		attack = Attack(target)
+		attack.start()
 	def terminate(self,signum,frame):
 		print("")
 		print(colors.R + "[!]" +colors.W + " Interrupted")
