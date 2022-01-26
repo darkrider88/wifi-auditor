@@ -9,8 +9,8 @@ from scapy.all import *
 
 class Scanner(object):
 	"""docstring for Scanner"""
-	def __init__(self):
-		
+	def __init__(self,engine):
+		self.ENGINE = engine
 		self.interface = "wlan0mon"
 		#initialize the networks dataframe that will contain all access points nearby
 		self.networks = {}
@@ -23,12 +23,12 @@ class Scanner(object):
 			p.start()
 			t = AsyncSniffer(prn=self.sniffAP, iface=self.interface)
 			t.start()
-			self.countdown(10)
+			self.countdown(5)
 			t.stop()	
 			p.terminate()
 			p.join()
 			self.printer()
-			choice = input("\n[?] To continue the scan press (y) else (n): ")
+			choice = input(colors.O + "[?]" +colors.W + " To continue the scan press (y) else (n): ")
 			if(choice.lower() == 'y'):
 				self.start()
 			else:
@@ -66,7 +66,8 @@ class Scanner(object):
 		for i in self.networks.values():
 			count +=1
 			print(colors.GR + str(i["bssid"]).upper() + '\t'  + str(i["channel"]) + '\t  ' + str(i["crypto"]).split(',')[0].replace('{','').replace("'","") +"\t" + str(i["signal"]) +" \t " +  str(i["ssid"]) + colors.W)
-		print("\n[+] Total networks found: ",count)
+		print("")
+		print(colors.BG + "[+]" +colors.W + " Total networks found: "+ colors.GR + str(count)+colors.W)
 		
 	def channel_hopper(self):
 	    while True:
@@ -80,13 +81,13 @@ class Scanner(object):
 	def scanAbort(self,signal, frame):
 
 		print("")
-		print("[!] Aborting scan")
-		input("select target to attack: ")
-		
+		print(colors.R+"[!]" + colors.W +" Aborting scan")
+		input(colors.O + "[?]" +colors.W + " Select target to attack (MAC Address): ")
+		self.ENGINE.exit()
 	def terminate(self,signum,frame):
 		print("")
-		print("[!] Interrupted")
-		exit(1)
+		print(colors.R + "[!]" +colors.W + " Interrupted")
+		self.ENGINE.exit()
 	
 	def countdown(self,t):
 
@@ -94,7 +95,7 @@ class Scanner(object):
 		while t:
 			mins, secs = divmod(t, 60)
 			timer = '{:02d}:{:02d}'.format(mins, secs)
-			print(colors.W +"Searching for networks: ", end=' ')
+			print(colors.O + "[+]" +colors.W + " Searching for networks: ", end=' ')
 			print(colors.GR + timer, end="\r")
 			time.sleep(1)
 			t -= 1

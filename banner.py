@@ -3,7 +3,7 @@ import colors
 
 
 def banner():
-		# os.system("clear")
+		os.system("clear")
 		print("\n\n")
 		print(colors.BOLD +colors.R + ''' #     # ###       ####### ###       #                                        
  #  #  #  #        #        #       # #   #    # #####  # #####  ####  #####  

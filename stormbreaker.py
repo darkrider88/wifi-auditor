@@ -17,8 +17,8 @@ class engine:
 		self.enable_monitor_mode()
 		banner()
 		
-		signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
-		scan = Scanner()
+		signal.signal(signal.SIGINT, self.keyboardInterruptHandler	)
+		scan = Scanner(self)
 		scan.start()
 		
 
@@ -44,11 +44,18 @@ class engine:
 
 	def keyboardInterruptHandler(self,signal, frame):
 		print("")
-		time.sleep(1)
-		print(colors.R + "[!] Interrupted")
-		print(colors.W+"[.] Disabling Monitor Mode.")
-		print("[-] Exitting")
+		print(colors.R + "[!]" +colors.W + " Interrupted")
+		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
 		self.disable_monitor_mode()
+		print(colors.R + "[!]" +colors.W + " Exitting")
+		exit(1)
+
+	def exit(self):
+		print("")
+		# print(colors.R + "[!]" +colors.W + " Interrupted")
+		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
+		self.disable_monitor_mode()
+		print(colors.R + "[!]" +colors.W + " Exitting")
 		exit(1)
 
 if __name__ == "__main__":
