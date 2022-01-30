@@ -58,6 +58,7 @@ class Scanner(object):
 				self.networks.update({bssid:{'bssid':bssid,'ssid':ssid,'channel':channel,'crypto':crypto,'signal':dbm_signal}})
 				# self.printer()
 
+
 	def printer(self):
 		os.system("clear")
 		banner()
@@ -82,9 +83,16 @@ class Scanner(object):
 	def scanAbort(self,signal, frame):
 
 		print("")
-		print(colors.R+"[!]" + colors.W +" Aborting scan")
+		print(colors.R+"[!] Aborting scan" + colors.W )
+
 		target = input(colors.O + "[?]" +colors.W + " Select target to attack (MAC Address): ")
-		attack = Attack(target)
+
+		while ( target.lower() not in self.networks):
+			target = input(colors.R + "[!]" +colors.W + " Target not found! Enter correct MAC Address: ")
+
+		target_bssid = self.networks[str(target).lower()]['bssid']
+		target_channel = self.networks[str(target).lower()]['channel']
+		attack = Attack(target_bssid ,target_channel)
 		attack.start()
 	def terminate(self,signum,frame):
 		print("")
