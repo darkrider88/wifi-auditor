@@ -8,6 +8,8 @@ import signal
 import time
 import keyboard
 import config
+
+
 class engine:
 	def __init__(self):
 		self.interface = "wlan0mon"
@@ -52,7 +54,6 @@ class engine:
 
 	def exit(self):
 		print("")
-		# print(colors.R + "[!]" +colors.W + " Interrupted")
 		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
 		self.disable_monitor_mode()
 		print(colors.R + "[!]" +colors.W + " Exitting")

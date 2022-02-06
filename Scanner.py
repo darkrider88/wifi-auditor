@@ -92,11 +92,9 @@ class Scanner(object):
 
 		target_bssid = self.networks[str(target).lower()]['bssid']
 		target_channel = self.networks[str(target).lower()]['channel']
-		attack = Attack(target_bssid ,target_channel)
+		attack = Attack(target_bssid ,target_channel,self.ENGINE)
 		attack.start()
 	def terminate(self,signum,frame):
-		print("")
-		print(colors.R + "[!]" +colors.W + " Interrupted")
 		self.ENGINE.exit()
 	
 	def countdown(self,t):

