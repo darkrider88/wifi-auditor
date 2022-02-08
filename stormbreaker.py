@@ -8,6 +8,7 @@ import signal
 import time
 import keyboard
 import config
+from glob import glob
 
 
 class engine:
@@ -44,18 +45,33 @@ class engine:
 		except e:
 			pass
 
+	def remove_files(self):
+		files = glob("capture*.cap")
+		for file in files:
+			if(os.path.exists(file)):
+				os.remove(file)
+
+		if(os.path.exists('wpaKey.txt')):
+			os.remove('wpaKey.txt')
+		if(os.path.exists('out.txt')):
+			os.remove('out.txt')
 	def keyboardInterruptHandler(self,signal, frame):
 		print("")
 		print(colors.R + "[!]" +colors.W + " Interrupted")
 		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
 		self.disable_monitor_mode()
+		print(colors.R + "[!]" +colors.W + " Removing useless files")
+		self.remove_files()
 		print(colors.R + "[!]" +colors.W + " Exitting")
+		
 		exit(1)
 
 	def exit(self):
 		print("")
 		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
 		self.disable_monitor_mode()
+		print(colors.R + "[!]" +colors.W + " Removing useless files")
+		self.remove_files()
 		print(colors.R + "[!]" +colors.W + " Exitting")
 		exit(1)
 

