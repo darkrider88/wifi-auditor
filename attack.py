@@ -41,6 +41,9 @@ class Attack(object):
 		self.hs.join()
 		self.verifier.cancel() # cancel handshake verifier
 		t.stop() # stop the deauther
+
+		if(self.hasHandshake):
+			self.call_cracker()
 		self.ENGINE.exit()
 
 
@@ -57,7 +60,7 @@ class Attack(object):
 					
 			if(self.hasHandshake):
 				print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
-				self.call_cracker()
+				
 			else:
 				print(colors.O + "[-]" + colors.W + " Timeout")
 		except KeyboardInterrupt:
@@ -140,11 +143,10 @@ class Attack(object):
 		x.crack()
 		# after cracking done ask user to save file 
 
-		choice = input(colors.O + "[-]" + colors.W + " Do you want to save the handshake? (y/n): ")
-		if(choice.lower() == 'y'):
-			file = glob("capture*.cap")[0]
-			os.rename(file, f"{self.targetRouterMac}_hs.cap")
-			print(colors.O + "[+]" + colors.W + f" Handshake saved: {self.targetRouterMac}_hs.cap")
+		print(colors.O + "[-]" + colors.W + " Saving your handshake ")
+		file = glob("capture*.cap")[0]
+		os.rename(file, f"{self.targetRouterMac}_hs.cap")
+		print(colors.O + "[+]" + colors.W + f" Handshake saved: {self.targetRouterMac}_hs.cap")
 
 
 

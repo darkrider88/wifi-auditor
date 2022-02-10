@@ -31,13 +31,15 @@ class Cracker(object):
 						os.system("clear")
 						print(colors.B + "[+]" + colors.W + " Cracking Password: ",line,end="\r")
 						if(os.path.exists(self.keyFile)):
+							os.kill(proc.pid,signal.SIGINT)
 							break
 
 				if(os.path.exists(self.keyFile)):
 					print(colors.O + "[+]" + colors.W + " Password cracked successfully!")
-					print(colors.BOLD + "[+]" + colors.W + ' KEY: ', open(self.keyFile,'r').readline())
+					print(colors.BOLD + "[+]" + colors.W + ' KEY: ' + colors.BOLD, open(self.keyFile,'r').readline())
+					print(colors.W)
 				else:
-					print("Not cracked :(")
+					print(colors.R + "[+]" + colors.W +" Not cracked :(")
 
 				return ""
 
