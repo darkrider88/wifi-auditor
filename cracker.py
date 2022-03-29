@@ -35,8 +35,12 @@ class Cracker(object):
 							break
 
 				if(os.path.exists(self.keyFile)):
+					os.system("clear")
 					print(colors.O + "[+]" + colors.W + " Password cracked successfully!")
-					print(colors.BOLD + "[+]" + colors.W + ' KEY: ' + colors.BOLD, open(self.keyFile,'r').readline())
+					print(colors.O + "[+]" + colors.W + " Retrieving Password")
+					time.sleep(1)
+					print()
+					print(colors.BOLD + "[+]" + colors.W + ' KEY: ' + colors.C+colors.BOLD, open(self.keyFile,'r').readline())
 					print(colors.W)
 				else:
 					print(colors.R + "[+]" + colors.W +" Not cracked :(")
