@@ -5,8 +5,8 @@ import signal
 import time
 import colors
 from banner import banner
-from attack import Attack
 from scapy.all import *
+from audit import Audit
 
 class Scanner(object):
 	"""docstring for Scanner"""
@@ -67,7 +67,7 @@ class Scanner(object):
 		print("")
 		for i in self.networks.values():
 			count +=1
-			print(colors.GR + str(i["bssid"]).upper() + '\t'  + str(i["channel"]) + '\t  ' + str(i["crypto"]).split(',')[0].replace('{','').replace("'","") +"\t" + str(i["signal"]) +" \t " +  str(i["ssid"]) + colors.W)
+			print(colors.GR + str(i["bssid"]).upper() + '\t'  + str(i["channel"]) + '\t  ' + str(i["crypto"]).split(',')[0].replace('{','').replace("}",'').replace("'","") +"\t" + str(i["signal"]) +" \t " +  str(i["ssid"]) + colors.W)
 		print("")
 		print(colors.BG + "[+]" +colors.W + " Total networks found: "+ colors.GR + str(count)+colors.W)
 		
@@ -92,8 +92,12 @@ class Scanner(object):
 
 		target_bssid = self.networks[str(target).lower()]['bssid']
 		target_channel = self.networks[str(target).lower()]['channel']
-		attack = Attack(target_bssid ,target_channel,self.ENGINE)
-		attack.start()
+
+		# calling audit
+		audit = Audit(self.networks[target_bssid],self.ENGINE)
+		audit.run()
+
+		
 	def terminate(self,signum,frame):
 		self.ENGINE.exit()
 	

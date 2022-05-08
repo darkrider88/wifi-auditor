@@ -1,0 +1,11 @@
+types = {
+	"wpa2": "WPA2 (Wi-Fi Protected Access 2) is the second generation of the Wi-Fi Protected Access wireless\n security protocol. Like its predecessor, WPA2 was designed to secure and protect Wi-Fi networks. WPA2\n ensures that data sent or received over your wireless network is encrypted, and only people with your\n network password have access to it.",
+	"wpa": "WPA2 (Wi-Fi Protected Access 2) is the second generation of the Wi-Fi Protected Access wireless\nsecurity protocol. Like its predecessor, WPA2 was designed to secure and protect Wi-Fi networks. WPA2\n ensures that data sent or received over your wireless network is encrypted, and only people with your\n network password have access to it.",
+
+	"wpa3-transition":"WPA3 (Wi-Fi Protected Access 3) is the newest wireless security protocol designed to encrypt data using\n a frequent and automatic encryption type called Perfect Forward Secrecy. It’s more secure than its\n predecessor, WPA2, but it hasn’t been widely adopted yet. Not all hardware supports WPA3 automatically,\n and using this protocol often requires costly upgrades.",
+	"wpa3":"WPA3 (Wi-Fi Protected Access 3) is the newest wireless security protocol designed to encrypt data using\n a frequent and automatic encryption type called Perfect Forward Secrecy. It’s more secure than its\n predecessor, WPA2, but it hasn’t been widely adopted yet. Not all hardware supports WPA3 automatically,\n and using this protocol often requires costly upgrades.",
+
+	"wep": "WEP encrypts traffic using a 64- or 128-bit key in hexadecimal. This is a static key, which means all\n traffic, regardless of device, is encrypted using a single key. A WEP key allows computers on a network to\n exchange encoded messages while hiding the messages' contents from intruders. This key is what is used to\n connect to a wireless-security-enabled network. One of WEP’s main goals was to prevent Man-in-the-Middle\n attacks",
+
+	"wps": "WiFi Protected Setup (WPS) is a standard for the easy and secure establishment of a wireless network.\n You do not need to know the SSID and security key or passphrase when connecting WPS-enabled devices. WPS\n automatically configures the network name (SSID) and WPA security key for the access point and the\n WPS-enabled client devices on a network. But WPS has many security vulnerability."
+}

@@ -55,6 +55,8 @@ class engine:
 			os.remove('wpaKey.txt')
 		if(os.path.exists('out.txt')):
 			os.remove('out.txt')
+		if(os.path.exists('report.txt')):
+			os.remove('report.txt')
 	def keyboardInterruptHandler(self,signal, frame):
 		print("")
 		print(colors.R + "[!]" +colors.W + " Interrupted")
