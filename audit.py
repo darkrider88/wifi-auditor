@@ -15,8 +15,9 @@ import csv
 
 class Audit(object):
 	"""docstring for Audit"""
-	def __init__(self, target,engine):
-		# {'bssid': 'a0:94:6a:09:c5:e8', 'ssid': 'J-201 2.4', 'channel': 12, 'crypto': {'WPA2/PSK', 'WPA/PSK'}, 'signal': -30}
+	def __init__(self, target,engine,passOrHandshake):
+		
+		self.passOrHandshake = passOrHandshake
 		self.target = target
 		self.targetRouterMac = self.target['bssid']
 		self.encryption = self.target['crypto']
@@ -158,24 +159,27 @@ class Audit(object):
 		if val.lower() == 'k':
 			print('')
 			print(colors.C + colors.BOLD + "[+] " + colors.W + "This attack tries to de-authenticate connected devices from the router so that when they\n\t try to reconnect we could capture the authentication packets which contains the hash, which\n\t can be used to get the plain text Password")
-		while val.lower() != 'y' or val.lower() != 'e':
+
+
+		while val.lower() != 'y' and val.lower() != 'e':
 			print('')
 			val = input(colors.O +colors.BOLD+ "[-] " + colors.W + "Press"+ colors.BOLD + " 'Y' " + colors.W+"to start attack "+ colors.BOLD + colors.C+ "'K' " + colors.W+"to know more and "+ colors.BOLD + colors.R + "'E' " + colors.W+"to exit: ")
 			if val.lower() == 'k':
 				print('')
 				print(colors.C + colors.BOLD + "[+] " + colors.W + "This attack tries to de-authenticate connected devices from the router so that when they\n\t try to reconnect we could capture the authentication packets which contains the hash, which\n\t can be used to get the plain text Password")
 				
-			if val.lower() == 'y':
-				target_bssid = self.target['bssid']
-				target_channel = self.target['channel']
-				print('')
-				print(colors.C + colors.BOLD + "[+] " + colors.W + "Starting password attack")
-				print('')
-				time.sleep(1)
-				attack = Attack(target_bssid ,target_channel,self.ENGINE)
-				attack.start()
+		
+		if val.lower() == 'y':
+			target_bssid = self.target['bssid']
+			target_channel = self.target['channel']
+			print('')
+			print(colors.C + colors.BOLD + "[+] " + colors.W + "Starting password attack")
+			print('')
+			time.sleep(1)
+			attack = Attack(target_bssid ,target_channel,self.ENGINE,self.passOrHandshake)
+			attack.start()
 
-			if val.lower() == 'e':
-					self.ENGINE.exit()
+		if val.lower() == 'e':
+				self.ENGINE.exit()
 
 

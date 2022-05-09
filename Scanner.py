@@ -93,8 +93,14 @@ class Scanner(object):
 		target_bssid = self.networks[str(target).lower()]['bssid']
 		target_channel = self.networks[str(target).lower()]['channel']
 
+		print('')
+		passOrHandshake = input(colors.C +  colors.BOLD+"[?] " + colors.W +"Do you want to crack the password (P) or just the handshake (H): ")
+		
+		while(passOrHandshake.lower() != 'p' and passOrHandshake.lower() != 'h'):
+			passOrHandshake = input(colors.R + colors.BOLD+ "[?] " + colors.W +"Please enter the correct value: (P/H) ")
+		
 		# calling audit
-		audit = Audit(self.networks[target_bssid],self.ENGINE)
+		audit = Audit(self.networks[target_bssid],self.ENGINE,passOrHandshake)
 		audit.run()
 
 		

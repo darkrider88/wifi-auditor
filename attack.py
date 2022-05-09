@@ -18,7 +18,8 @@ import sys
 
 class Attack(object):
 	"""docstring for Attack"""
-	def __init__(self, targetRouterMac,channel,engine):
+	def __init__(self, targetRouterMac,channel,engine,passOrHandshake):
+		self.passOrHandshake = passOrHandshake
 		self.ENGINE = engine # main class for exiting the program
 		self.clients = []
 		self.interface = "wlan0mon"
@@ -143,15 +144,9 @@ class Attack(object):
 		file = glob("capture*.cap")[0]
 		shutil.copyfile(file,f"{self.targetRouterMac}.cap")
 
-		val = ''
-		try:
-			tcflush(sys.stdin, TCIOFLUSH)
-
-			val = input(colors.O+"[?] " + colors.W +"Do you want to crack the passwords? (Y/N): ")
-		except:
-			pass
-
-		if val.lower() == 'y':
+		
+		
+		if self.passOrHandshake.lower() == 'p':
 			print(colors.B + "[+]" + colors.W + " Trying to crack the passwords.")
 			time.sleep(1)
 			print(colors.O + "[-]" + colors.W + " Starting the cracker")
@@ -159,7 +154,7 @@ class Attack(object):
 			x = Cracker(self.targetRouterMac,self.clients,self.ENGINE)
 			x.crack()
 
-		else:
+		if self.passOrHandshake.lower() == 'h':
 			# calling final report builder
 			r = ReportBuilder(self.targetRouterMac,'',self.clients,self.ENGINE)
 			r.reportBuilder()

@@ -34,7 +34,7 @@ class ReportBuilder:
 
 
 		if os.path.exists(hs):
-			handshake_file = colors.P + str(hs) + colors.W
+			handshake_file = colors.P + os.getcwd() +'/'+ str(hs) + colors.W
 		else:
 			handshake_file = 'Not Captured'
 
@@ -48,6 +48,7 @@ class ReportBuilder:
 		print()
 		print(colors.C+ colors.BOLD+"[+] "+ colors.W + colors.BOLD + "Building Final Report..." + colors.W)
 		time.sleep(2)
+		print('\n\n')
 		print(tabulate(report_txt,tablefmt="fancy_grid",headers=[colors.GR+ colors.BOLD+ "Property"+ colors.W,colors.GR+colors.BOLD+"Value" + colors.W]))
 		self.ENGINE.exit()
 
