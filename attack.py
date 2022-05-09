@@ -10,6 +10,11 @@ from check_handshake import checkHandshake
 import signal
 from cracker import Cracker
 import shutil
+from report_builder import ReportBuilder
+from termios import tcflush, TCIOFLUSH
+import sys
+
+
 
 class Attack(object):
 	"""docstring for Attack"""
@@ -45,7 +50,7 @@ class Attack(object):
 
 		if(self.hasHandshake):
 			self.call_cracker()
-		self.ENGINE.exit()
+		# self.ENGINE.exit()
 
 
 	def search_client(self):
@@ -60,12 +65,20 @@ class Attack(object):
 					self.deauth_clients()
 					
 			if(self.hasHandshake):
-				print(colors.BOLD+colors.O + "[+]" + colors.W +colors.BOLD+" Captured handshake successfully!" + colors.W)
+				print()
+				print(colors.BOLD+colors.O + "[+]" + colors.P +colors.BOLD+" Captured handshake successfully!" + colors.W)
 				
 			else:
+				print()
 				print(colors.R + "[-]" + colors.W + " Timeout")
 				print()
+				time.sleep(1)
 				print(colors.O + "[!]" + colors.W + " No devices are connected to the router!")
+				time.sleep(1)
+				print()
+				r = ReportBuilder(self.targetRouterMac,'',self.clients,self.ENGINE)
+				r.reportBuilder()
+				self.ENGINE.exit()
 		except KeyboardInterrupt:
 			pass
 
@@ -76,7 +89,7 @@ class Attack(object):
 		if(len(self.clients) != 0):
 			print("")
 			client = colors.BOLD+colors.GR + str(self.clients).upper() + colors.W
-			print(colors.GR + colors.BOLD+ "[+]" + colors.W + f" Sending Deauth packet to: {self.clients}")
+			print(colors.GR + colors.BOLD+ "[+]" + colors.W + " Sending Deauth packet to: "+colors.O+ str(self.clients) + colors.W)
 			for i in self.clients:
 				self.deauth(i)
 				time.sleep(0.2)
@@ -128,19 +141,28 @@ class Attack(object):
 	def call_cracker(self):
 		print(colors.O + "[-]" + colors.W + " Saving your handshake ")
 		file = glob("capture*.cap")[0]
-		shutil.copyfile(file,f"{self.targetRouterMac}_hs.cap")
+		shutil.copyfile(file,f"{self.targetRouterMac}.cap")
 
+		val = ''
+		try:
+			tcflush(sys.stdin, TCIOFLUSH)
 
-		val = input(colors.O+"[?] " + colors.W +"Do you want to crack the passwords? (Y/N) ")
+			val = input(colors.O+"[?] " + colors.W +"Do you want to crack the passwords? (Y/N): ")
+		except:
+			pass
+
 		if val.lower() == 'y':
 			print(colors.B + "[+]" + colors.W + " Trying to crack the passwords.")
 			time.sleep(1)
 			print(colors.O + "[-]" + colors.W + " Starting the cracker")
 			time.sleep(3)
-			x = Cracker()
+			x = Cracker(self.targetRouterMac,self.clients,self.ENGINE)
 			x.crack()
 
 		else:
+			# calling final report builder
+			r = ReportBuilder(self.targetRouterMac,'',self.clients,self.ENGINE)
+			r.reportBuilder()
 			self.ENGINE.exit()
 		
 

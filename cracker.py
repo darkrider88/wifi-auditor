@@ -3,21 +3,23 @@ from glob import glob
 import signal
 import sys
 import colors
-
+from report_builder import ReportBuilder
 
 class Cracker(object):
 	"""docstring for Cracker"""
-	def __init__(self):
+	def __init__(self,targetRouterMac,clients,engine):
 		try:
 			self.pcapFile = glob("capture*.cap")[0]
 
 		except:
 			self.pcapFile = None
 
+		self.ENGINE = engine
 		self.wordlist = "/usr/share/wordlists/rockyou.txt"
 		self.tempFile = "out.txt"
 		self.keyFile = "wpaKey.txt"
-
+		self.targetRouterMac = targetRouterMac
+		self.clients = clients
 	def crack(self):
 		if(self.pcapFile != None):
 			try:
@@ -40,10 +42,15 @@ class Cracker(object):
 					print(colors.O + "[+]" + colors.W + " Retrieving Password")
 					time.sleep(1)
 					print()
-					print(colors.BOLD + "[+]" + colors.W + ' KEY: ' + colors.C+colors.BOLD, open(self.keyFile,'r').readline())
+					passkey = open(self.keyFile,'r').readline()
+					print(colors.BOLD + "[+]" + colors.W + ' KEY: ' + colors.C+colors.BOLD, passkey )
 					print(colors.W)
+					r = ReportBuilder(self.targetRouterMac,passkey,self.clients,self.ENGINE)
+					r.reportBuilder()
 				else:
 					print(colors.R + "[+]" + colors.W +" Not cracked :(")
+					r = ReportBuilder(self.targetRouterMac,passkey,self.clients,self.ENGINE)
+					r.reportBuilder()
 
 				return ""
 

@@ -5,6 +5,7 @@ import subprocess,re
 from info import types
 from tabulate import   tabulate
 from attack import Attack
+import csv
 
 # def print(str):
 #     for char in str:
@@ -75,15 +76,22 @@ class Audit(object):
 		else:
 			firmware = "New Version"
 
-		wps = "Disabled" if "wps" not in enc else colors.R+"Enabled" + colors.W
+		wps =  colors.BOLD + "Disabled" + colors.W if "wps" not in enc else colors.R+"Enabled" + colors.W
 		security = ""
 
-		if firmware == "Old" and "wps" in enc:
+		if firmware == "Old Version" and "wps" in enc:
 			security = colors.R+"Weak" + colors.W
-		elif firmware == "Old":
+		elif firmware == "Old Version":
+			security = colors.O+"Medium" + colors.W
+		elif firmware == "New Version" and 'wps' in enc:
 			security = colors.O+"Medium" + colors.W
 		else:
 			security = colors.BOLD+"Strong"+colors.W
+
+		if firmware == "Old Version":
+			firmware = colors.R + firmware + colors.W
+		else:
+			firmware = colors.GR +"New Version" + colors.W
 
 		report = []
 
@@ -92,7 +100,7 @@ class Audit(object):
 		report.append(['Channel',info['channel']])
 		report.append(['Strength',info['signal']])
 		report.append(['Encryption',info['crypto']])
-		report.append(['Firmware',firmware])
+		report.append(['Firmware',firmware ])
 		report.append(['Devices Connected',devices])
 		report.append(["WPS",wps])
 		report.append(['Type',types[about]])
@@ -106,8 +114,9 @@ class Audit(object):
 		print(tabulate(report,tablefmt="fancy_grid",headers=[colors.GR+ colors.BOLD+ "Property"+ colors.W,colors.GR+colors.BOLD+"Value" + colors.W]))
 
 		# save this info in a file
-		with open("report.txt",'w') as f:
-			f.write(str(report))
+		with open("report.csv",'w') as f:
+			write = csv.writer(f)
+			write.writerows(report)
 		f.close()
 
 
@@ -129,7 +138,7 @@ class Audit(object):
 		time.sleep(2)
 		print('')
 		print(colors.O + colors.BOLD+ "[+] " + colors.W + "Getting connected devices to the router",end=' ')
-		self.countdown(10)
+		self.countdown(15)
 		print('')
 		print(colors.O + colors.BOLD+"[+] " + colors.W + "Checking the overall security strength")
 		time.sleep(2)
@@ -143,8 +152,13 @@ class Audit(object):
 		print(colors.R +colors.BOLD + "[?] " + colors.W + "Do you want to conduct a Password attack? ")
 
 		
-		
-		while True:
+		print('')
+		val = input(colors.O +colors.BOLD+ "[-] " + colors.W + "Press"+ colors.BOLD + " 'Y' " + colors.W+"to start attack "+ colors.BOLD + colors.C+ "'K' " + colors.W+"to know more and "+ colors.BOLD + colors.R + "'E' " + colors.W+"to exit: ")
+
+		if val.lower() == 'k':
+			print('')
+			print(colors.C + colors.BOLD + "[+] " + colors.W + "This attack tries to de-authenticate connected devices from the router so that when they\n\t try to reconnect we could capture the authentication packets which contains the hash, which\n\t can be used to get the plain text Password")
+		while val.lower() != 'y' or val.lower() != 'e':
 			print('')
 			val = input(colors.O +colors.BOLD+ "[-] " + colors.W + "Press"+ colors.BOLD + " 'Y' " + colors.W+"to start attack "+ colors.BOLD + colors.C+ "'K' " + colors.W+"to know more and "+ colors.BOLD + colors.R + "'E' " + colors.W+"to exit: ")
 			if val.lower() == 'k':

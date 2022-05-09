@@ -29,7 +29,7 @@ class Scanner(object):
 			p.terminate()
 			p.join()
 			self.printer()
-			choice = input(colors.O + "[?]" +colors.W + " To continue the scan press (y) else (n): ")
+			choice = input(colors.O + "[?]" +colors.W + " Do you want to scan again? (Y/N): ")
 			if(choice.lower() == 'y'):
 				self.start()
 			else:

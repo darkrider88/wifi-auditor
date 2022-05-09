@@ -55,8 +55,8 @@ class engine:
 			os.remove('wpaKey.txt')
 		if(os.path.exists('out.txt')):
 			os.remove('out.txt')
-		if(os.path.exists('report.txt')):
-			os.remove('report.txt')
+		if(os.path.exists('report.csv')):
+			os.remove('report.csv')
 	def keyboardInterruptHandler(self,signal, frame):
 		print("")
 		print(colors.R + "[!]" +colors.W + " Interrupted")
@@ -72,7 +72,7 @@ class engine:
 		print("")
 		print(colors.O + "[+]" +colors.W + " Disabling Monitor Mode.")
 		self.disable_monitor_mode()
-		print(colors.R + "[!]" +colors.W + " Removing useless files")
+		print(colors.C + "[!]" +colors.W + " Removing useless files")
 		self.remove_files()
 		print(colors.R + "[!]" +colors.W + " Exitting")
 		exit(1)
