@@ -13,4 +13,4 @@ def banner():
  #  #  #  #        #        #     #     # #    # #    # #   #   #    # #   #  
   ## ##  ###       #       ###    #     #  ####  #####  #   #    ####  #    # 
                                                                               ''')
-		print(colors.GR + "\t\t\t\t\t-By Shashwat Pandey" + colors.C + "\n \t\t\t\t\t    Priyanshi Meghwani" + colors.P + "\n \t\t\t\t\t    Saumya Singh\n\n" + colors.W)
+		print(colors.GR + "\t\t\t\t\t-By Shashwat Pandey")
